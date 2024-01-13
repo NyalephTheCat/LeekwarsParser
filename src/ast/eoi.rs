@@ -8,7 +8,7 @@ use crate::Rule;
 pub struct Eoi;
 
 impl PrintAst for Eoi {
-    fn print_ast(&self, print_properties: crate::utils::PrintProperties) -> String {
+    fn print_ast(&self, _print_properties: crate::utils::PrintProperties) -> String {
         String::new()
     }
 }

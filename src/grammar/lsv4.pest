@@ -38,7 +38,7 @@ ClassExtension         = {
     Extends ~ Identifier
 }
 ClassBody              = {
-    LBracket ~ ClassStatement* ~ RBracket
+    LBrace ~ ClassStatement* ~ RBrace
 }
 ClassStatement         = {
     MethodDeclaration
@@ -99,7 +99,7 @@ DoWhileStatement = {
 }
 
 BlockStatement = {
-    LBracket ~ Statement* ~ RBracket ~ Semi?
+    LBrace ~ Statement* ~ RBrace
 }
 EmptyStatement = _{
     Semi
@@ -264,7 +264,7 @@ Map           = {
   | (LSBracket ~ Colon ~ RSBracket)
 }
 Object        = {
-    LBracket ~ KeyValuePairs* ~ RBracket
+    LBrace ~ KeyValuePairs* ~ RBrace
 }
 KeyValuePairs = {
     KeyValuePair ~ (Comma ~ KeyValuePair)*
@@ -408,8 +408,8 @@ Static      = @{ "static" ~ !IdentifierTail }
 Eq              = { "=" }
 Semi            = { ";" }
 Colon           = { ":" }
-LBracket        = { "{" }
-RBracket        = { "}" }
+LBrace        = { "{" }
+RBrace        = { "}" }
 LSBracket       = { "[" }
 RSBracket       = { "]" }
 LParen          = { "(" }

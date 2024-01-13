@@ -1,7 +1,6 @@
 use from_pest::FromPest;
 use pest::Parser;
-use crate::ast::AstNode;
-use crate::ast::Lsv4Root::Lsv4Root;
+use crate::ast::lsv4root::Lsv4Root;
 use crate::lsv4;
 use crate::utils::{PrintAst, PrintProperties};
 
@@ -34,4 +33,11 @@ fn empty_statement() {
     symetric_parse(";;");
     symetric_parse(";//comment\n;");
     symetric_parse("/*comment*/;");
+}
+
+#[test]
+fn block_statement() {
+    symetric_parse("{;}");
+    symetric_parse("{}");
+    symetric_parse("{\n\t;\n}");
 }

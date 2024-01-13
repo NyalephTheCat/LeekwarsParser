@@ -1,10 +1,10 @@
-use std::thread::current;
 use from_pest::{ConversionError, FromPest, Void};
 use pest::iterators::Pairs;
 use pest_ast::FromPest;
 use crate::ast::AstNode;
-use crate::ast::Eoi::Eoi;
-use crate::ast::Semi::Semi;
+use crate::ast::block_statement::BlockStatement;
+use crate::ast::eoi::Eoi;
+use crate::ast::semi::Semi;
 use crate::lsv4::Rule;
 use crate::utils::PrintAst;
 
@@ -37,7 +37,6 @@ impl FromPest<'_> for Lsv4Root {
         current_rule = pest.next().ok_or(ConversionError::NoMatch)?;
 
         let mut statements = Vec::new();
-        let mut eoi = None;
 
         let mut context = &mut current_rule.clone().into_inner();
 
@@ -52,7 +51,7 @@ impl FromPest<'_> for Lsv4Root {
         }
 
         // Try to get eoi
-        eoi = Some(AstNode::<Eoi>::from_pest(&mut context)?);
+        let eoi = Some(AstNode::<Eoi>::from_pest(&mut context)?);
 
         Ok(Lsv4Root {
             statements,
@@ -66,12 +65,14 @@ impl FromPest<'_> for Lsv4Root {
 #[pest_ast(rule(Rule::Statement))]
 pub enum Statement {
     EmptyStatement(AstNode<Semi>),
+    BlockStatement(AstNode<BlockStatement>),
 }
 
 impl PrintAst for Statement {
     fn print_ast(&self, print_properties: crate::utils::PrintProperties) -> String {
         match self {
             Statement::EmptyStatement(semi) => semi.print_ast(print_properties),
+            Statement::BlockStatement(block_statement) => block_statement.print_ast(print_properties),
         }
     }
 }
