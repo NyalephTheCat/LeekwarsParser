@@ -10,7 +10,7 @@ impl Default for PrintProperties {
     fn default() -> Self {
         PrintProperties {
             keep_comments: true,
-            simplify_whitespace: true,
+            simplify_whitespace: false,
             compact: false,
             indent: 0,
         }

@@ -9,7 +9,6 @@ pub struct Eoi;
 
 impl PrintAst for Eoi {
     fn print_ast(&self, print_properties: crate::utils::PrintProperties) -> String {
-        let mut result = String::new();
-        result
+        String::new()
     }
 }
