@@ -95,7 +95,7 @@ WhileStatement   = {
     While ~ LParen ~ Expression ~ RParen ~ Statement
 }
 DoWhileStatement = {
-    Do ~ Expression ~ While ~ LParen ~ Expression ~ RParen ~ Semi?
+    Do ~ Statement ~ While ~ LParen ~ Expression ~ RParen ~ Semi?
 }
 
 BlockStatement = {

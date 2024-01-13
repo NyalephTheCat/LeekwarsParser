@@ -7,17 +7,33 @@ mod return_statement;
 mod expression;
 mod break_statement;
 mod continue_statement;
+mod while_statement;
+mod do_while_statement;
 
 use from_pest::{ConversionError, FromPest, Void};
 use pest::iterators::Pairs;
 use crate::lsv4::Rule;
 use crate::utils;
 use crate::utils::PrintAst;
+use std::fmt::Pointer;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct AstNode<T: for<'a> FromPest<'a> + PrintAst> {
     pub data: Box<T>,
     pub meta: AstNodeMeta,
+}
+
+impl<T: for<'a> FromPest<'a> + PrintAst + std::fmt::Debug> std::fmt::Debug for AstNode<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if f.alternate() {
+            return std::fmt::Debug::fmt(&self.data, f);
+        }
+
+        f.debug_struct("AstNode")
+            .field("data", &self.data)
+            .field("meta", &self.meta)
+            .finish()
+    }
 }
 
 impl<'a, T: for<'b> FromPest<'b, Rule = Rule, FatalError = Void> + PrintAst> FromPest<'a> for AstNode<T> {

@@ -2,7 +2,9 @@ use crate::ast::expression::ExpressionStatement;
 use from_pest::{ConversionError, FromPest, Void};
 use pest::iterators::Pairs;
 use crate::ast::break_statement::BreakStatement;
+use crate::ast::do_while_statement::DoWhileStatement;
 use crate::ast::return_statement::ReturnStatement;
+use crate::ast::while_statement::WhileStatement;
 use super::AstNode;
 use super::block_statement::BlockStatement;
 use super::continue_statement::ContinueStatement;
@@ -18,6 +20,8 @@ pub enum Statement {
     BreakStatement(AstNode<BreakStatement>),
     ContinueStatement(AstNode<ContinueStatement>),
     ExpressionStatement(AstNode<ExpressionStatement>),
+    WhileStatement(AstNode<WhileStatement>),
+    DoWhileStatement(AstNode<DoWhileStatement>),
 }
 
 impl PrintAst for Statement {
@@ -29,6 +33,8 @@ impl PrintAst for Statement {
             Statement::BreakStatement(break_statement) => break_statement.print_ast(print_properties),
             Statement::ContinueStatement(continue_statement) => continue_statement.print_ast(print_properties),
             Statement::ExpressionStatement(expression_statement) => expression_statement.print_ast(print_properties),
+            Statement::WhileStatement(while_statement) => while_statement.print_ast(print_properties),
+            Statement::DoWhileStatement(do_while_statement) => do_while_statement.print_ast(print_properties),
         }
     }
 }
@@ -66,6 +72,12 @@ impl FromPest<'_> for Statement {
                 },
                 Rule::ExpressionStatement => {
                     Ok(Statement::ExpressionStatement(AstNode::from_pest(&mut context)?))
+                },
+                Rule::WhileStatement => {
+                    Ok(Statement::WhileStatement(AstNode::from_pest(&mut context)?))
+                },
+                Rule::DoWhileStatement => {
+                    Ok(Statement::DoWhileStatement(AstNode::from_pest(&mut context)?))
                 },
                 _ => Err(ConversionError::NoMatch),
             }
