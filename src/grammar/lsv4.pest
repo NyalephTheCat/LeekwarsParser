@@ -1,0 +1,439 @@
+lsv4_root = { SOI ~ Statement* ~ EOI }
+
+// TODO
+// Verify some stuff (for, types, priorities (as)...)
+// Add future things (interface, enum, switch...)
+
+Statement = {
+    VariableDeclaration
+  | FunctionDeclaration
+  | ClassDeclaration
+  | Expression
+  | IfStatement
+  | ForStatement
+  | WhileStatement
+  | DoWhileStatement
+  | BlockStatement
+  | ReturnStatement
+  | BreakStatement
+  | EmptyStatement
+}
+
+ReturnStatement = {
+    Return ~ Expression? ~ Semi?
+}
+
+BreakStatement = {
+    Break ~ Semi?
+}
+
+ClassDeclaration       = {
+    Class ~ Identifier ~ ClassExtension? ~ ClassBody ~ Semi?
+}
+ClassExtension         = {
+    Extends ~ Identifier
+}
+ClassBody              = {
+    LBracket ~ ClassStatement* ~ RBracket
+}
+ClassStatement         = {
+    MethodDeclaration
+  | PropertyDeclaration
+  | ConstructorDeclaration
+  | EmptyStatement
+}
+PropertyDeclaration    = {
+    Visibility? ~ Static? ~ (Type ~ &Identifier)? ~ Identifier ~ (Eq ~ Expression)? ~ Semi?
+}
+MethodDeclaration      = {
+    Visibility? ~ Static? ~ (Type ~ &Identifier)? ~ Identifier ~ LParen ~ Parameters? ~ RParen ~ BlockStatement ~ Semi?
+}
+ConstructorDeclaration = {
+    Visibility? ~ Constructor ~ LParen ~ Parameters? ~ RParen ~ BlockStatement
+}
+Visibility             = {
+    Private
+  | Public
+  | Protected
+}
+
+FunctionDeclaration = {
+    Function ~ Identifier ~ LParen ~ Parameters? ~ RParen ~ BlockStatement ~ Semi?
+}
+VariableDeclaration = {
+    VarDecStart ~ Identifier ~ (Eq ~ Expression)?
+}
+VarDecStart         = {
+    VarDec
+  | (Global ~ (Type ~ &Identifier)?)
+}
+
+IfStatement = {
+    If ~ LParen ~ Expression ~ RParen ~ Statement ~ (Else ~ Statement)? ~ Semi?
+}
+
+ForStatement   = {
+    For ~ LParen ~ ForInnerCond ~ RParen ~ Statement ~ Semi?
+}
+ForInnerCond   = {
+    ForInCond
+  | ForInitCondInc
+}
+ForInCond      = {
+    // TODO have a look at this
+    (VarDec ~ Identifier ~ Colon)? ~ VarDec ~ Identifier ~ In ~ Expression
+}
+ForInitCondInc = {
+    VariableDeclaration? ~ Semi ~ Expression? ~ Semi ~ Expression?
+}
+
+WhileStatement   = {
+    While ~ LParen ~ Expression ~ RParen ~ Statement
+}
+DoWhileStatement = {
+    Do ~ Expression ~ While ~ LParen ~ Expression ~ RParen ~ Semi?
+}
+
+BlockStatement = {
+    LBracket ~ Statement* ~ RBracket ~ Semi?
+}
+EmptyStatement = {
+    Semi
+}
+
+ExpressionStatement = {
+    Expression ~ Semi?
+}
+
+Expression = {
+    AssignmentExpression
+  | AnonymousFunction
+  | LambdaFunction
+  | TernaryExpression
+}
+
+AnonymousFunction     =  {
+    Function ~ LParen ~ Parameters? ~ RParen ~ (Arrow ~ Type)? ~ BlockStatement
+}
+LambdaFunction        =  {
+    TypedLambdaFunction
+  | UntypedLambdaFunction
+}
+UntypedLambdaFunction = _{
+    LambdaParameters? ~ Arrow ~ LambdaBody
+}
+TypedLambdaFunction   = _{
+    LambdaParameters? ~ Arrow ~ Type ~ LambdaBody
+}
+LambdaBody            =  {
+    Expression
+  | BlockStatement
+}
+LambdaParameters      =  {
+    Parameter
+  | (LParen ~ Parameters ~ RParen)
+}
+Parameters            =  { Parameter ~ (Comma ~ Parameter)* }
+Parameter             =  { (Type ~ &Identifier)? ~ Identifier }
+
+AssignmentExpression = {
+    LeftHandSideExpression ~ AssignmentOperator ~ Expression
+}
+
+TernaryExpression = {
+    LogicalORExpression ~ (QuestionMark ~ Expression ~ Colon ~ Expression)*
+}
+
+LogicalORExpression = {
+    LogicalXORExpression ~ (LogicalOR ~ LogicalXORExpression)*
+}
+
+LogicalXORExpression = {
+    LogicalANDExpression ~ (LogicalXOR ~ LogicalANDExpression)*
+}
+
+LogicalANDExpression = {
+    EqualityExpression ~ (LogicalAND ~ EqualityExpression)*
+}
+
+EqualityExpression = {
+    RelationalExpression ~ (EqualityOperator ~ RelationalExpression)*
+}
+
+RelationalExpression = {
+    BooleanORExpression ~ (RelationalOperator ~ BooleanORExpression)*
+}
+
+BooleanORExpression = {
+    BooleanXORExpression ~ (BooleanOR ~ BooleanXORExpression)*
+}
+
+BooleanXORExpression = {
+    BooleanANDExpression ~ (BooleanXOR ~ BooleanANDExpression)*
+}
+
+BooleanANDExpression = {
+    AdditiveExpression ~ (BooleanAND ~ AdditiveExpression)*
+}
+
+AdditiveExpression = {
+    MultiplicativeExpression ~ (AdditiveOperator ~ MultiplicativeExpression)*
+}
+
+MultiplicativeExpression = {
+    UpdateExpression ~ (MultiplicativeOperator ~ UpdateExpression)*
+}
+
+UpdateExpression = {
+    PreUpdateExpression
+  | PostUpdateExpression
+  | UnaryExpression
+}
+
+PreUpdateExpression = {
+    UpdateOperator ~ MemberExpression
+}
+
+PostUpdateExpression = {
+    MemberExpression ~ UpdateOperator
+}
+
+UnaryExpression = {
+    UnaryOperator? ~ MemberExpression
+}
+
+LeftHandSideExpression = {
+    MemberExpression
+}
+
+MemberExpression = {
+    PrimaryExpression ~ MemberAccessor*
+}
+
+MemberAccessor   = {
+    ArrayAccessor
+  | ObjectAccessor
+  | CallAccessor
+  | NullableAccessor
+}
+ArrayAccessor    = { LSBracket ~ Expression ~ RSBracket }
+ObjectAccessor   = { Dot ~ Identifier }
+NullableAccessor = { !"!=" ~ ExclamationMark }
+
+CallAccessor  = { LParen ~ CallArguments? ~ RParen }
+CallArguments = { Expression ~ (Comma ~ Expression)* }
+
+PrimaryExpression = {
+    Identifier
+  | Number
+  | String
+  | Boolean
+  | Null
+  | Array
+  | Set
+  | Map
+  | Object
+  | ParenthesizedExpression
+}
+
+Array         = {
+    LSBracket ~ ArrayElements? ~ RSBracket
+}
+Set           = {
+    LChev ~ ArrayElements? ~ RChev
+}
+ArrayElements = {
+    Expression ~ (Comma ~ Expression)*
+}
+Map           = {
+    (LSBracket ~ KeyValuePairs+ ~ RSBracket)
+  | (LSBracket ~ Colon ~ RSBracket)
+}
+Object        = {
+    LBracket ~ KeyValuePairs* ~ RBracket
+}
+KeyValuePairs = {
+    KeyValuePair ~ (Comma ~ KeyValuePair)*
+}
+KeyValuePair  = {
+    Expression ~ Colon ~ Expression
+}
+
+ParenthesizedExpression = {
+    LParen ~ Expression ~ RParen
+}
+
+// String
+String                 =  {
+    SingleQuoteString
+  | DoubleQuoteString
+}
+SingleQuoteString      = @{
+    SingleQuote ~ SingleQuoteStringInner* ~ SingleQuote
+}
+SingleQuote            =  { "'" }
+SingleQuoteStringInner =  { !SingleQuote ~ ANY }
+DoubleQuoteString      = @{
+    DoubleQuote ~ DoubleQuoteStringInner* ~ DoubleQuote
+}
+DoubleQuote            =  { "\"" }
+DoubleQuoteStringInner =  { !DoubleQuote ~ ANY }
+
+// Number
+Number          =  {
+    Real
+  | Hex
+  | Bin
+  | Integer
+}
+Hex             = @{
+    HexPrefix ~ (ASCII_HEX_DIGIT ~ (NumberSeparator? ~ ASCII_HEX_DIGIT)*)
+}
+HexPrefix       =  { "0x" | "0X" }
+Bin             = @{
+    HexPrefix ~ (BinDigit ~ (NumberSeparator? ~ BinDigit)*)
+}
+BinPrefix       =  { "0b" | "0b" }
+BinDigit        =  { "0" | "1" }
+Integer         = @{
+    Zero
+  | (ASCII_NONZERO_DIGIT ~ (NumberSeparator? ~ ASCII_DIGIT)*)
+}
+Real            = @{
+    (Integer ~ "." ~ Integer?)
+  | ("." ~ Integer?)
+}
+Zero            =  { "0" }
+NumberSeparator =  { "_" }
+
+// Variables
+VarDec = { Var | Type }
+
+Type     = {
+    BaseType ~ (Pipe ~ BaseType)* ~ QuestionMark?
+}
+BaseType = {
+    Identifier ~ SubType?
+}
+SubType  = { LChev ~ (Type ~ (Comma ~ Type)*)? ~ ReturnType? ~ RChev }
+ReturnType = { Arrow ~ Type }
+// TODO do more complex types
+
+// Identifiers
+Identifier     = @{
+    !(Reserved ~ !IdentifierTail) ~ (IdentifierHead ~ IdentifierTail*)
+}
+IdentifierHead =  { "_" | ASCII_ALPHA }
+IdentifierTail =  { "_" | ASCII_ALPHANUMERIC }
+
+// Booleans
+Boolean = { True | False }
+
+// Keywords
+Reserved = {
+    True
+  | False
+  | Null
+  | If
+  | Else
+  | Var
+  | Global
+  | In
+  | As
+  | For
+  | While
+  | Do
+  | And
+  | Or
+  | Xor
+  | Not
+  | TypeOf
+  | InstanceOf
+  | Function
+  | Return
+  | Break
+  | Class
+  | Extends
+  | Private
+  | Public
+  | Protected
+  | Static
+}
+
+True        = @{ "true" ~ !IdentifierTail }
+False       = @{ "false" ~ !IdentifierTail }
+Null        = @{ "null" ~ !IdentifierTail }
+If          = @{ "if" ~ !IdentifierTail }
+Else        = @{ "else" ~ !IdentifierTail }
+Var         = @{ "var" ~ !IdentifierTail }
+Global      = @{ "global" ~ !IdentifierTail }
+In          = @{ "in" ~ !IdentifierTail }
+As          = @{ "as" ~ !IdentifierTail }
+For         = @{ "for" ~ !IdentifierTail }
+While       = @{ "while" ~ !IdentifierTail }
+Do          = @{ "do" ~ !IdentifierTail }
+And         = @{ "and" ~ !IdentifierTail }
+Or          = @{ "or" ~ !IdentifierTail }
+Xor         = @{ "xor" ~ !IdentifierTail }
+Not         = @{ "not" ~ !IdentifierTail }
+TypeOf      = @{ "typeof" ~ !IdentifierTail }
+InstanceOf  = @{ "instanceof" ~ !IdentifierTail }
+Function    = @{ "function" ~ !IdentifierTail }
+Return      = @{ "return" ~ !IdentifierTail }
+Break       = @{ "break" ~ !IdentifierTail }
+Class       = @{ "class" ~ !IdentifierTail }
+Extends     = @{ "extends" ~ !IdentifierTail }
+Constructor = @{ "constructor" ~ !IdentifierTail }
+Private     = @{ "private" ~ !IdentifierTail }
+Public      = @{ "public" ~ !IdentifierTail }
+Protected   = @{ "protected" ~ !IdentifierTail }
+Static      = @{ "static" ~ !IdentifierTail }
+
+// Symbols
+Eq              = { "=" }
+Semi            = { ";" }
+Colon           = { ":" }
+LBracket        = { "{" }
+RBracket        = { "}" }
+LSBracket       = { "[" }
+RSBracket       = { "]" }
+LParen          = { "(" }
+RParen          = { ")" }
+Dot             = { "." }
+Comma           = { "," }
+Arrow           = { "=>" | "->" }
+QuestionMark    = { "?" }
+LChev           = { "<" }
+RChev           = { ">" }
+Pipe            = { "|" }
+ExclamationMark = { "!" }
+
+// Operators
+AssignmentOperator     = { Eq | "+=" | "-=" | "*=" | "/=" | "%=" }
+LogicalOR              = { "||" | Or }
+LogicalXOR             = { "^^" | Xor }
+LogicalAND             = { "&&" | And }
+BooleanOR              = { "|" }
+BooleanXOR             = { "^" }
+BooleanAND             = { "&" }
+EqualityOperator       = { "==" | "!=" }
+RelationalOperator     = { "<=" | ">=" | "<" | ">" | InstanceOf | In | As }
+AdditiveOperator       = { "+" | "-" }
+MultiplicativeOperator = { "*" | "/" | "%" }
+UnaryOperator          = { "-" | "!" | "~" | TypeOf | Not }
+UpdateOperator         = { "++" | "--" }
+
+WHITESPACE     = ${ Tab | Space | LineTerminator }
+Tab            =  { "\t" }
+Space          =  { " " }
+LineTerminator =  { "\r\n" | "\n" | "\r" }
+
+COMMENT                = ${
+    SingleLineComment
+  | MultiLineComment
+}
+SingleLineComment      = @{ SingleLineCommentStart ~ (!LineTerminator ~ ANY)* }
+SingleLineCommentStart =  { "//" }
+MultiLineComment       = @{ MultiLineCommentStart ~ (!MultiLineCommentEnd ~ ANY)* ~ MultiLineCommentEnd }
+MultiLineCommentStart  =  { "/*" }
+MultiLineCommentEnd    =  { "*/" }
