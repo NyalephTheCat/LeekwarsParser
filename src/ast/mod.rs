@@ -1,7 +1,12 @@
 pub mod lsv4root;
 pub mod eoi;
-mod semi;
-mod block_statement;
+pub mod semi;
+pub mod block_statement;
+pub mod statement;
+mod return_statement;
+mod expression;
+mod break_statement;
+mod continue_statement;
 
 use from_pest::{ConversionError, FromPest, Void};
 use pest::iterators::Pairs;
@@ -15,7 +20,7 @@ pub struct AstNode<T: for<'a> FromPest<'a> + PrintAst> {
     pub meta: AstNodeMeta,
 }
 
-impl<'a, T: for<'b> from_pest::FromPest<'b, Rule = Rule, FatalError = Void> + PrintAst> FromPest<'a> for AstNode<T> {
+impl<'a, T: for<'b> FromPest<'b, Rule = Rule, FatalError = Void> + PrintAst> FromPest<'a> for AstNode<T> {
     type Rule = Rule;
     type FatalError = Void;
 

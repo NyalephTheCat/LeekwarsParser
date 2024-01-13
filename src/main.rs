@@ -54,10 +54,8 @@ fn display_pairs(pairs: Pairs<Rule>, level: usize, exclude_comments_and_whitespa
 
 
 fn main() {
-    let input = r#"; /* Some comments */
-//An empty statement
-;"#;
-    let mut pairs = lsv4::Lsv4Parser::parse(lsv4::Rule::lsv4_root, input).unwrap_or_else(|e| panic!("{}", e));
+    let input = r#""#;
+    let mut pairs = lsv4::Lsv4Parser::parse(Rule::lsv4_root, input).unwrap_or_else(|e| panic!("{}", e));
 
     println!("{}", display_pairs(pairs.clone(), 0, true));
 

@@ -13,7 +13,7 @@ Statement = {
   | WhileStatement
   | DoWhileStatement
   | BlockStatement
-  | Expression
+  | ExpressionStatement
   | ReturnStatement
   | BreakStatement
   | ContinueStatement

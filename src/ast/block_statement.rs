@@ -1,6 +1,6 @@
 use pest_ast::FromPest;
 use crate::ast::AstNode;
-use crate::ast::lsv4root::Statement;
+use crate::ast::statement::Statement;
 use crate::utils::PrintAst;
 use crate::Rule;
 
