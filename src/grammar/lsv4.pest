@@ -227,13 +227,23 @@ PrimaryExpression = {
     Identifier
   | Number
   | String
+  | Constant
   | Boolean
   | Null
   | Array
   | Set
   | Map
   | Object
+  | Interval
+  | Constant
   | ParenthesizedExpression
+}
+
+Interval = {
+    IntervalBorn ~ Expression ~ DotDot ~ Expression ~ IntervalBorn
+}
+IntervalBorn = {
+    LSBracket | RSBracket
 }
 
 Array         = {
@@ -317,7 +327,6 @@ BaseType = {
 }
 SubType  = { LChev ~ (Type ~ (Comma ~ Type)*)? ~ ReturnType? ~ RChev }
 ReturnType = { Arrow ~ Type }
-// TODO do more complex types
 
 // Identifiers
 Identifier     = @{
@@ -399,7 +408,8 @@ LSBracket       = { "[" }
 RSBracket       = { "]" }
 LParen          = { "(" }
 RParen          = { ")" }
-Dot             = { "." }
+DotDot          = { ".." }
+Dot             = { !DotDot ~ "." }
 Comma           = { "," }
 Arrow           = { "=>" | "->" }
 QuestionMark    = { "?" }
@@ -407,6 +417,15 @@ LChev           = { "<" }
 RChev           = { ">" }
 Pipe            = { "|" }
 ExclamationMark = { "!" }
+
+// Constants
+Constant = {
+    Infinity
+  | PI
+}
+
+Infinity = { "∞" }
+PI       = { "π" }
 
 // Operators
 AssignmentOperator     = { Eq | "+=" | "-=" | "*=" | "/=" | "%=" }
