@@ -1,7 +1,10 @@
+use std::thread::current;
 use from_pest::{ConversionError, FromPest, Void};
 use pest::iterators::Pairs;
 use pest_ast::FromPest;
 use crate::ast::AstNode;
+use crate::ast::Eoi::Eoi;
+use crate::ast::Semi::Semi;
 use crate::lsv4::Rule;
 use crate::utils::PrintAst;
 
@@ -9,37 +12,6 @@ use crate::utils::PrintAst;
 pub struct Lsv4Root {
     pub statements: Vec<AstNode<Statement>>,
     pub eoi: AstNode<Eoi>,
-}
-
-impl FromPest<'_> for Lsv4Root {
-    type Rule = Rule;
-    type FatalError = Void;
-
-    fn from_pest(pest: &mut Pairs<Self::Rule>) -> Result<Self, ConversionError<Self::FatalError>> {
-        println!("Lsv4Root::from_pest");
-        if pest.peek().unwrap().as_rule() != Rule::lsv4_root {
-            return Err(ConversionError::NoMatch);
-        }
-
-        // Get inner pairs
-        let mut inner_pairs = pest.next().unwrap().into_inner();
-        let mut statements = Vec::new();
-        while let Some(statement) = inner_pairs.next() {
-            println!("statement: {:?}", statement);
-
-            let statement = AstNode::<Statement>::from_pest(&mut Pairs::single(statement));
-            if let Ok(statement) = statement {
-                statements.push(statement);
-            } else {
-                break;
-            }
-        }
-
-        Ok(Lsv4Root {
-            statements,
-            eoi: AstNode::<Eoi>::from_pest(pest)?,
-        })
-    }
 }
 
 impl PrintAst for Lsv4Root {
@@ -53,38 +25,53 @@ impl PrintAst for Lsv4Root {
     }
 }
 
-#[derive(FromPest, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[pest_ast(rule(Rule::EOI))]
-pub struct Eoi;
-
-impl PrintAst for Eoi {
-    fn print_ast(&self, print_properties: crate::utils::PrintProperties) -> String {
-        String::new()
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Statement; // TODO: Implement this
-
-impl FromPest<'_> for Statement {
+impl FromPest<'_> for Lsv4Root {
     type Rule = Rule;
     type FatalError = Void;
 
     fn from_pest(pest: &mut Pairs<Self::Rule>) -> Result<Self, ConversionError<Self::FatalError>> {
-        println!("Statement::from_pest");
-        if pest.peek().unwrap().as_rule() != Rule::Statement {
+        let mut current_rule = pest.peek().ok_or(ConversionError::NoMatch)?;
+        if current_rule.as_rule() != Rule::lsv4_root {
             return Err(ConversionError::NoMatch);
         }
+        current_rule = pest.next().ok_or(ConversionError::NoMatch)?;
 
-        pest.next(); // Eat the Statement pair
+        let mut statements = Vec::new();
+        let mut eoi = None;
 
-        Ok(Statement)
+        let mut context = &mut current_rule.clone().into_inner();
+
+        // While you can convert to a statement, do so
+        loop {
+            let statement = AstNode::<Statement>::from_pest(&mut context);
+            if let Ok(statement) = statement {
+                statements.push(statement);
+            } else {
+                break;
+            }
+        }
+
+        // Try to get eoi
+        eoi = Some(AstNode::<Eoi>::from_pest(&mut context)?);
+
+        Ok(Lsv4Root {
+            statements,
+            eoi: eoi.ok_or(ConversionError::NoMatch)?
+        })
     }
+}
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(FromPest)]
+#[pest_ast(rule(Rule::Statement))]
+pub enum Statement {
+    EmptyStatement(AstNode<Semi>),
 }
 
 impl PrintAst for Statement {
     fn print_ast(&self, print_properties: crate::utils::PrintProperties) -> String {
-        String::new()
+        match self {
+            Statement::EmptyStatement(semi) => semi.print_ast(print_properties),
+        }
     }
 }

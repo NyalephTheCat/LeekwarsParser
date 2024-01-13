@@ -1,5 +1,8 @@
 pub mod Lsv4Root;
+pub mod Eoi;
+mod Semi;
 
+use std::ops::Deref;
 use from_pest::{ConversionError, FromPest, Void};
 use pest::iterators::Pairs;
 use crate::lsv4::Rule;
@@ -16,26 +19,29 @@ impl<'a, T: for<'b> from_pest::FromPest<'b, Rule = Rule, FatalError = Void> + Pr
     type Rule = Rule;
     type FatalError = Void;
 
-    fn from_pest(pest: &mut Pairs<Self::Rule>) -> Result<Self, ConversionError<Self::FatalError>> {
-        let mut prev_ignored = Vec::new();
-        let mut data = None;
-        for pair in pest {
-            match pair.as_rule() {
-                Rule::COMMENT => {
-                    prev_ignored.push(CommentOrWhitespace::Comment(pair.as_str().to_string()));
-                }
-                Rule::WHITESPACE => {
-                    prev_ignored.push(CommentOrWhitespace::Whitespace(pair.as_str().to_string()));
-                }
-                _ => {
-                    data = Some(T::from_pest(&mut Pairs::single(pair))?);
-                    break;
-                }
+    fn from_pest(pest: &mut Pairs<'a, Rule>) -> Result<Self, ConversionError<Self::FatalError>> {
+        let mut current_rule = pest.peek().ok_or(ConversionError::NoMatch)?;
+        let mut meta = AstNodeMeta {
+            prev_ignored: Vec::new(),
+        };
+        let mut context = pest.clone();
+        loop {
+            let comment_or_whitespace = CommentOrWhitespace::from_pest(&mut context);
+            if let Ok(comment_or_whitespace) = comment_or_whitespace {
+                meta.prev_ignored.push(comment_or_whitespace);
+            } else {
+                break;
             }
         }
+
+        let data = Box::new(T::from_pest(&mut context)?);
+
+        // Set pest to the context after the last parsed rule
+        *pest = context;
+
         Ok(AstNode {
-            data: Box::new(data.ok_or(ConversionError::NoMatch)?),
-            meta: AstNodeMeta { prev_ignored },
+            data,
+            meta,
         })
     }
 }
@@ -89,6 +95,33 @@ impl PrintAst for CommentOrWhitespace {
                 }
             }
         }
+    }
+}
+
+impl FromPest<'_> for CommentOrWhitespace {
+    type Rule = Rule;
+    type FatalError = Void;
+
+    fn from_pest(pest: &mut Pairs<Self::Rule>) -> Result<Self, ConversionError<Self::FatalError>> {
+        let mut current_rule = pest.peek().ok_or(ConversionError::NoMatch)?;
+        if current_rule.as_rule() != Rule::COMMENT && current_rule.as_rule() != Rule::WHITESPACE {
+            return Err(ConversionError::NoMatch);
+        }
+        current_rule = pest.next().ok_or(ConversionError::NoMatch)?;
+
+        let mut context = current_rule.clone().into_inner();
+        let comment_or_whitespace = match current_rule.as_rule() {
+            Rule::COMMENT => {
+                let comment = context.next().ok_or(ConversionError::NoMatch)?.as_str().to_string();
+                CommentOrWhitespace::Comment(comment)
+            }
+            Rule::WHITESPACE => {
+                let whitespace = context.next().ok_or(ConversionError::NoMatch)?.as_str().to_string();
+                CommentOrWhitespace::Whitespace(whitespace)
+            }
+            _ => return Err(ConversionError::NoMatch),
+        };
+        Ok(comment_or_whitespace)
     }
 }
 

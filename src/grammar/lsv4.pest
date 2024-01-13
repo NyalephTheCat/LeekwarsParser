@@ -16,6 +16,7 @@ Statement = {
   | BlockStatement
   | ReturnStatement
   | BreakStatement
+  | ContinueStatement
   | EmptyStatement
 }
 
@@ -25,6 +26,9 @@ ReturnStatement = {
 
 BreakStatement = {
     Break ~ Semi?
+}
+ContinueStatement = {
+    Continue ~ Semi?
 }
 
 ClassDeclaration       = {
@@ -97,7 +101,7 @@ DoWhileStatement = {
 BlockStatement = {
     LBracket ~ Statement* ~ RBracket ~ Semi?
 }
-EmptyStatement = {
+EmptyStatement = _{
     Semi
 }
 
@@ -361,6 +365,7 @@ Reserved = {
   | Function
   | Return
   | Break
+  | Continue
   | Class
   | Extends
   | Private
@@ -390,6 +395,7 @@ InstanceOf  = @{ "instanceof" ~ !IdentifierTail }
 Function    = @{ "function" ~ !IdentifierTail }
 Return      = @{ "return" ~ !IdentifierTail }
 Break       = @{ "break" ~ !IdentifierTail }
+Continue    = @{ "continue" ~ !IdentifierTail }
 Class       = @{ "class" ~ !IdentifierTail }
 Extends     = @{ "extends" ~ !IdentifierTail }
 Constructor = @{ "constructor" ~ !IdentifierTail }
