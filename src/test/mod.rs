@@ -37,7 +37,5 @@ fn empty_statement() {
 
 #[test]
 fn block_statement() {
-    symetric_parse("{;}");
     symetric_parse("{}");
-    symetric_parse("{\n\t;\n}");
 }

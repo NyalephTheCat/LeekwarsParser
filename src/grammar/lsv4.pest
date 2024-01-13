@@ -8,12 +8,12 @@ Statement = {
     VariableDeclaration
   | FunctionDeclaration
   | ClassDeclaration
-  | Expression
   | IfStatement
   | ForStatement
   | WhileStatement
   | DoWhileStatement
   | BlockStatement
+  | Expression
   | ReturnStatement
   | BreakStatement
   | ContinueStatement
