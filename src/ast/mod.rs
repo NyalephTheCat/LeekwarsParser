@@ -9,6 +9,7 @@ mod break_statement;
 mod continue_statement;
 mod while_statement;
 mod do_while_statement;
+mod if_statement;
 
 use from_pest::{ConversionError, FromPest, Void};
 use pest::iterators::Pairs;

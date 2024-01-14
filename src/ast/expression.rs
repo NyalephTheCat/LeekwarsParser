@@ -33,7 +33,7 @@ impl FromPest<'_> for Expression {
     type FatalError = Void;
 
     fn from_pest(pest: &mut Pairs<Rule>) -> Result<Self, ConversionError<Self::FatalError>> {
-        if (pest.peek().unwrap().as_rule() != Rule::Expression) {
+        if pest.peek().unwrap().as_rule() != Rule::Expression {
             return Err(ConversionError::NoMatch);
         }
         pest.next();
