@@ -5,6 +5,7 @@ use crate::ast::break_statement::BreakStatement;
 use crate::ast::do_while_statement::DoWhileStatement;
 use crate::ast::return_statement::ReturnStatement;
 use crate::ast::while_statement::WhileStatement;
+use crate::ast::if_statement::IfStatement;
 use super::AstNode;
 use super::block_statement::BlockStatement;
 use super::continue_statement::ContinueStatement;
@@ -22,6 +23,7 @@ pub enum Statement {
     ExpressionStatement(AstNode<ExpressionStatement>),
     WhileStatement(AstNode<WhileStatement>),
     DoWhileStatement(AstNode<DoWhileStatement>),
+    IfStatement(AstNode<IfStatement>),
 }
 
 impl PrintAst for Statement {
@@ -35,6 +37,7 @@ impl PrintAst for Statement {
             Statement::ExpressionStatement(expression_statement) => expression_statement.print_ast(print_properties),
             Statement::WhileStatement(while_statement) => while_statement.print_ast(print_properties),
             Statement::DoWhileStatement(do_while_statement) => do_while_statement.print_ast(print_properties),
+            Statement::IfStatement(if_statement) => if_statement.print_ast(print_properties),
         }
     }
 }
@@ -79,7 +82,13 @@ impl FromPest<'_> for Statement {
                 Rule::DoWhileStatement => {
                     Ok(Statement::DoWhileStatement(AstNode::from_pest(&mut context)?))
                 },
-                _ => Err(ConversionError::NoMatch),
+                Rule::IfStatement => {
+                    Ok(Statement::IfStatement(AstNode::from_pest(&mut context)?))
+                },
+                rule => {
+                    println!("Unexpected rule: {:?}", rule);
+                    Err(ConversionError::NoMatch)
+                },
             }
         } else {
             Err(ConversionError::NoMatch)
