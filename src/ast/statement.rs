@@ -3,6 +3,7 @@ use from_pest::{ConversionError, FromPest, Void};
 use pest::iterators::Pairs;
 use crate::ast::break_statement::BreakStatement;
 use crate::ast::do_while_statement::DoWhileStatement;
+use crate::ast::function_declaration::FunctionDeclaration;
 use crate::ast::return_statement::ReturnStatement;
 use crate::ast::while_statement::WhileStatement;
 use crate::ast::if_statement::IfStatement;
@@ -24,6 +25,7 @@ pub enum Statement {
     WhileStatement(AstNode<WhileStatement>),
     DoWhileStatement(AstNode<DoWhileStatement>),
     IfStatement(AstNode<IfStatement>),
+    FunctionDeclaration(AstNode<FunctionDeclaration>),
 }
 
 impl PrintAst for Statement {
@@ -38,6 +40,7 @@ impl PrintAst for Statement {
             Statement::WhileStatement(while_statement) => while_statement.print_ast(print_properties),
             Statement::DoWhileStatement(do_while_statement) => do_while_statement.print_ast(print_properties),
             Statement::IfStatement(if_statement) => if_statement.print_ast(print_properties),
+            Statement::FunctionDeclaration(function_declaration) => function_declaration.print_ast(print_properties),
         }
     }
 }
@@ -57,39 +60,42 @@ impl FromPest<'_> for Statement {
 
         let next = find_next_non_comment_or_whitespace(&mut context)?;
         if let Some(next) = next {
-            match next.as_rule() {
+            Ok(match next.as_rule() {
                 Rule::Semi => {
-                    Ok(Statement::EmptyStatement(AstNode::from_pest(&mut context)?))
+                    Statement::EmptyStatement(AstNode::from_pest(&mut context)?)
                 },
                 Rule::BlockStatement => {
-                    Ok(Statement::BlockStatement(AstNode::from_pest(&mut context)?))
+                    Statement::BlockStatement(AstNode::from_pest(&mut context)?)
                 },
                 Rule::ReturnStatement => {
-                    Ok(Statement::ReturnStatement(AstNode::from_pest(&mut context)?))
+                    Statement::ReturnStatement(AstNode::from_pest(&mut context)?)
                 },
                 Rule::BreakStatement => {
-                    Ok(Statement::BreakStatement(AstNode::from_pest(&mut context)?))
+                    Statement::BreakStatement(AstNode::from_pest(&mut context)?)
                 },
                 Rule::ContinueStatement => {
-                    Ok(Statement::ContinueStatement(AstNode::from_pest(&mut context)?))
+                    Statement::ContinueStatement(AstNode::from_pest(&mut context)?)
                 },
                 Rule::ExpressionStatement => {
-                    Ok(Statement::ExpressionStatement(AstNode::from_pest(&mut context)?))
+                    Statement::ExpressionStatement(AstNode::from_pest(&mut context)?)
                 },
                 Rule::WhileStatement => {
-                    Ok(Statement::WhileStatement(AstNode::from_pest(&mut context)?))
+                    Statement::WhileStatement(AstNode::from_pest(&mut context)?)
                 },
                 Rule::DoWhileStatement => {
-                    Ok(Statement::DoWhileStatement(AstNode::from_pest(&mut context)?))
+                    Statement::DoWhileStatement(AstNode::from_pest(&mut context)?)
                 },
                 Rule::IfStatement => {
-                    Ok(Statement::IfStatement(AstNode::from_pest(&mut context)?))
+                    Statement::IfStatement(AstNode::from_pest(&mut context)?)
                 },
+                Rule::FunctionDeclaration => {
+                    Statement::FunctionDeclaration(AstNode::from_pest(&mut context)?)
+                }
                 rule => {
                     println!("Unexpected rule: {:?}", rule);
-                    Err(ConversionError::NoMatch)
+                    return Err(ConversionError::NoMatch);
                 },
-            }
+            })
         } else {
             Err(ConversionError::NoMatch)
         }
