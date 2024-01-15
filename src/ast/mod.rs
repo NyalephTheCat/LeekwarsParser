@@ -10,6 +10,9 @@ mod continue_statement;
 mod while_statement;
 mod do_while_statement;
 mod if_statement;
+mod function_declaration;
+mod type_annotation;
+mod identifier;
 
 use from_pest::{ConversionError, FromPest, Void};
 use pest::iterators::Pairs;
