@@ -27,7 +27,10 @@ pub struct AstNode<T: for<'a> FromPest<'a> + PrintAst> {
 impl<T: for<'a> FromPest<'a> + PrintAst + std::fmt::Debug> std::fmt::Debug for AstNode<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if f.alternate() {
-            return std::fmt::Debug::fmt(&self.data, f);
+            return f.debug_struct("AstNode")
+                .field("data", &self.data)
+                .field("nb_children", &self.meta.prev_ignored.len())
+                .finish();
         }
 
         f.debug_struct("AstNode")
@@ -44,27 +47,46 @@ impl<'a, T: for<'b> FromPest<'b, Rule = Rule, FatalError = Void> + PrintAst> Fro
     fn from_pest(pest: &mut Pairs<'a, Rule>) -> Result<Self, ConversionError<Self::FatalError>> {
         let mut meta = AstNodeMeta {
             prev_ignored: Vec::new(),
+            post_ignored: Vec::new(),
         };
+
         let mut context = pest.clone();
-        loop {
-            let comment_or_whitespace = CommentOrWhitespace::from_pest(&mut context);
-            if let Ok(comment_or_whitespace) = comment_or_whitespace {
-                meta.prev_ignored.push(comment_or_whitespace);
-            } else {
-                break;
-            }
-        }
+
+        // Extract preceding comments and whitespace
+        meta.prev_ignored = extract_comments_or_whitespace(&mut context, true)?;
 
         let data = Box::new(T::from_pest(&mut context)?);
 
-        // Set pest to the context after the last parsed rule
+        // Check if the next significant node is not a comment or whitespace
+        if is_last_significant_node(&mut context) {
+            meta.post_ignored = extract_comments_or_whitespace(&mut context, false)?;
+        }
+
         *pest = context;
 
-        Ok(AstNode {
-            data,
-            meta,
-        })
+        Ok(AstNode { data, meta })
     }
+}
+
+// Extracts comments or whitespace based on the direction (before or after the node)
+fn extract_comments_or_whitespace(pest: &mut Pairs<Rule>, before_node: bool) -> Result<Vec<CommentOrWhitespace>, ConversionError<Void>> {
+    let mut items = Vec::new();
+
+    while let Some(_) = pest.peek() {
+        if let Ok(comment_or_whitespace) = CommentOrWhitespace::from_pest(pest) {
+            items.push(comment_or_whitespace);
+        } else {
+            break;
+        }
+    }
+
+    Ok(items)
+}
+
+// Checks if the current position in the pest iterator is at the last significant node
+fn is_last_significant_node(pest: &mut Pairs<Rule>) -> bool {
+    let remaining = pest.clone().filter(|p| p.as_rule() != Rule::COMMENT && p.as_rule() != Rule::WHITESPACE);
+    remaining.count() == 0
 }
 
 impl<T: for<'a> FromPest<'a> + PrintAst> PrintAst for AstNode<T> {
@@ -74,9 +96,13 @@ impl<T: for<'a> FromPest<'a> + PrintAst> PrintAst for AstNode<T> {
             result.push_str(&comment_or_whitespace.print_ast(print_properties));
         }
         result.push_str(&self.data.print_ast(print_properties));
+        for comment_or_whitespace in &self.meta.post_ignored {
+            result.push_str(&comment_or_whitespace.print_ast(print_properties));
+        }
         result
     }
 }
+
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum CommentOrWhitespace {
@@ -149,4 +175,5 @@ impl FromPest<'_> for CommentOrWhitespace {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct AstNodeMeta {
     pub prev_ignored: Vec<CommentOrWhitespace>,
+    pub post_ignored: Vec<CommentOrWhitespace>, // Ignored after the node if it's the last node
 }
