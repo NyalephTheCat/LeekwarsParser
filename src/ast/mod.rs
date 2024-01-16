@@ -13,6 +13,7 @@ mod if_statement;
 mod function_declaration;
 mod type_annotation;
 mod identifier;
+mod variable_declaration;
 
 use from_pest::{ConversionError, FromPest, Void};
 use pest::iterators::Pairs;

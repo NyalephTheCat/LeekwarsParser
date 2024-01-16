@@ -65,9 +65,9 @@ FunctionDeclaration = {
     Function ~ Identifier ~ LParen ~ Parameters? ~ RParen ~ BlockStatement ~ Semi?
 }
 VariableDeclaration = {
-    VarDecStart ~ Identifier ~ (Eq ~ Expression)?
+    VarDeclKeyword ~ Identifier ~ (Eq ~ Expression)? ~ Semi?
 }
-VarDecStart         = {
+VarDeclKeyword         = {
     VarDec
   | (Global ~ (Type ~ &Identifier)?)
 }

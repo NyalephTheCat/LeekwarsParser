@@ -7,6 +7,7 @@ use crate::ast::function_declaration::FunctionDeclaration;
 use crate::ast::return_statement::ReturnStatement;
 use crate::ast::while_statement::WhileStatement;
 use crate::ast::if_statement::IfStatement;
+use crate::ast::variable_declaration::VariableDeclaration;
 use super::AstNode;
 use super::block_statement::BlockStatement;
 use super::continue_statement::ContinueStatement;
@@ -26,6 +27,7 @@ pub enum Statement {
     DoWhileStatement(AstNode<DoWhileStatement>),
     IfStatement(AstNode<IfStatement>),
     FunctionDeclaration(AstNode<FunctionDeclaration>),
+    VariableDeclaration(AstNode<VariableDeclaration>),
 }
 
 impl PrintAst for Statement {
@@ -41,6 +43,7 @@ impl PrintAst for Statement {
             Statement::DoWhileStatement(do_while_statement) => do_while_statement.print_ast(print_properties),
             Statement::IfStatement(if_statement) => if_statement.print_ast(print_properties),
             Statement::FunctionDeclaration(function_declaration) => function_declaration.print_ast(print_properties),
+            Statement::VariableDeclaration(variable_declaration) => variable_declaration.print_ast(print_properties),
         }
     }
 }
@@ -90,7 +93,10 @@ impl FromPest<'_> for Statement {
                 },
                 Rule::FunctionDeclaration => {
                     Statement::FunctionDeclaration(AstNode::from_pest(&mut context)?)
-                }
+                },
+                Rule::VariableDeclaration => {
+                    Statement::VariableDeclaration(AstNode::from_pest(&mut context)?)
+                },
                 rule => {
                     println!("Unexpected rule: {:?}", rule);
                     return Err(ConversionError::NoMatch);
