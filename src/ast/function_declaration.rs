@@ -51,8 +51,8 @@ impl FromPest<'_> for FunctionDeclaration {
         let function_keyword = AstNode::from_pest(&mut context)?;
         let identifier = AstNode::from_pest(&mut context)?;
         let lparen = AstNode::from_pest(&mut context)?;
-        let parameters = AstNode::from_pest(&mut context).ok(); println!("parameters: {:?}", parameters);
-        let rparen = AstNode::from_pest(&mut context)?; println!("rparen: {:?}", rparen);
+        let parameters = AstNode::from_pest(&mut context).ok();
+        let rparen = AstNode::from_pest(&mut context)?;
         let block_statement = AstNode::from_pest(&mut context)?;
         let semi = AstNode::from_pest(&mut context).ok();
 

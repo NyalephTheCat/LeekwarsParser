@@ -55,9 +55,6 @@ fn display_pairs(pairs: Pairs<Rule>, level: usize, exclude_comments_and_whitespa
 
 fn main() {
     let input = r#"
-function add(a, b) {
-    return a + b;
-}
     "#;
     let mut pairs = lsv4::Lsv4Parser::parse(Rule::lsv4_root, input).unwrap_or_else(|e| panic!("{}", e));
 
