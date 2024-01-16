@@ -62,6 +62,9 @@ impl FromPest<'_> for Statement {
         let mut context = &mut current_rule.clone().into_inner();
 
         let next = find_next_non_comment_or_whitespace(&mut context)?;
+
+        println!("next: {:?}", next.clone().map(|n| n.as_rule()));
+
         if let Some(next) = next {
             Ok(match next.as_rule() {
                 Rule::Semi => {

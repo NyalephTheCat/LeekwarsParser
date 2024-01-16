@@ -30,9 +30,6 @@ impl FromPest<'_> for VariableDeclaration {
         let mut context = pest.next().unwrap().into_inner();
 
         let var_decl_keyword = AstNode::from_pest(&mut context)?;
-
-        println!("VariableDeclaration: {:?}", context.as_str());
-
         let identifier = AstNode::from_pest(&mut context)?;
         let equal = AstNode::from_pest(&mut context).ok();
         let expression = AstNode::from_pest(&mut context).ok();

@@ -17,6 +17,9 @@ impl FromPest<'_> for TypeAnnotation {
     type FatalError = Void;
 
     fn from_pest(pest: &mut Pairs<'_, Self::Rule>) -> Result<Self, ConversionError<Self::FatalError>> {
+        if pest.peek().is_none() {
+            return Err(ConversionError::Extraneous { current_node: "Type annotation" })
+        }
         if pest.peek().unwrap().as_rule() != Rule::Type {
             return Err(ConversionError::NoMatch);
         }
